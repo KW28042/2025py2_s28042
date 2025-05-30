@@ -4,9 +4,8 @@ Podstawowy skrypt do łączenia się z NCBI i pobierania rekordów sekwencji gen
 
 from io import StringIO
 from Bio import Entrez, SeqIO
-import time
-import os
 import pandas as pd
+import matplotlib.pyplot as plt
 
 class NCBIRetriever:
     def __init__(self, email, api_key):
@@ -96,8 +95,26 @@ def generate_csv(records, taxid):
         "sequence length": seq_lengths,
         "description": descriptions
     })
-    df.to_csv(f"taxid_{taxid}_attributes.csv")
+    path = f"taxid_{taxid}_attributes.csv"
+    df.to_csv(path)
+    print(f"Saved csv report to {path}.")
 
+
+def generate_chart(records, taxid):
+    accession_numbers = []
+    seq_lengths = []
+
+    for record in records:
+        accession_numbers.append(record.id)
+        seq_lengths.append(len(record.seq))
+
+    plt.plot(accession_numbers, seq_lengths, marker="o")
+    plt.xlabel("Accession number")
+    plt.ylabel("Seq length")
+    path = f"taxid_{taxid}_chart.png"
+    plt.savefig(path)
+    print(f"Saved chart to {path}.")
+    
 
 def main():
     # Uzyskaj dane uwierzytelniające
@@ -147,13 +164,12 @@ def main():
 
         filtered_records.append(record) 
 
+
     # [DODATEK] Generowanie csv
-    generate_csv(records, taxid)
+    generate_csv(filtered_records, taxid)
 
-
-
-    print(type(sample_records))
-
+    # [DODATEK] Generowanie wykresu
+    generate_chart(filtered_records, taxid)
     
     # Zapisz do pliku
     output_file = f"taxid_{taxid}_sample.gb"
