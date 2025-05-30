@@ -181,7 +181,6 @@ def main():
         f.write(sample_records)
         
     print(f"Saved sample records to {output_file}")
-    print("\nNote: This is just a basic retriever. You need to extend its functionality!")
 
 if __name__ == "__main__":
     main()
