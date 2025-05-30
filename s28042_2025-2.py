@@ -122,14 +122,14 @@ def generate_chart(records, taxid):
 
 def main():
     # Uzyskaj dane uwierzytelniające
-    email = "s28042@pjwstk.edu.pl" # input("Enter your email address for NCBI: ")
-    api_key = "9c54136959ab49f748460e18577568894f07" # input("Enter your NCBI API key: ")
+    email = input("Enter your email address for NCBI: ")
+    api_key = input("Enter your NCBI API key: ")
     
     # Utwórz obiekt retriever
     retriever = NCBIRetriever(email, api_key)
     
     # Uzyskaj taxid od użytkownika
-    taxid = "9606" # input("Enter taxonomic ID (taxid) of the organism: ")
+    taxid = input("Enter taxonomic ID (taxid) of the organism: ")
 
     # [DODATEK] Pobieranie minimalnej i maksymalnej długości sekwencji
     min_len_input = input("Enter minimum sequence length (leave blank for no minimum): ").strip()
