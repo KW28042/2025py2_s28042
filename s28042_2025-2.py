@@ -2,9 +2,11 @@
 Podstawowy skrypt do łączenia się z NCBI i pobierania rekordów sekwencji genetycznych dla danego identyfikatora taksonomicznego.
 """
 
-from Bio import Entrez
+from io import StringIO
+from Bio import Entrez, SeqIO
 import time
 import os
+import pandas as pd
 
 class NCBIRetriever:
     def __init__(self, email, api_key):
@@ -78,6 +80,24 @@ class NCBIRetriever:
         except Exception as e:
             print(f"Error fetching records: {e}")
             return ""
+        
+def generate_csv(records, taxid):
+    accession_numbers = []
+    seq_lengths = []
+    descriptions = []
+
+    for record in records:
+        accession_numbers.append(record.id)
+        seq_lengths.append(len(record.seq))
+        descriptions.append(descriptions)
+
+    df = pd.DataFrame({
+        "accession number": accession_numbers,
+        "sequence length": seq_lengths,
+        "description": descriptions
+    })
+    df.to_csv(f"taxid_{taxid}_attributes.csv")
+
 
 def main():
     # Uzyskaj dane uwierzytelniające
@@ -89,6 +109,19 @@ def main():
     
     # Uzyskaj taxid od użytkownika
     taxid = "9606" # input("Enter taxonomic ID (taxid) of the organism: ")
+
+    # [DODATEK] Pobieranie minimalnej i maksymalnej długości sekwencji
+    min_len_input = input("Enter minimum sequence length (leave blank for no minimum): ").strip()
+    max_len_input = input("Enter maximum sequence length (leave blank for no maximum): ").strip()
+    try:
+        min_len = int(min_len_input)
+    except ValueError:
+        min_len = None
+
+    try:
+        max_len = int(max_len_input)
+    except ValueError:
+        max_len = None
     
     # Szukaj rekordów
     count = retriever.search_taxid(taxid)
@@ -100,6 +133,27 @@ def main():
     # Pobierz kilka pierwszych rekordów jako próbkę
     print("\nFetching sample records...")
     sample_records = retriever.fetch_records(start=0, max_records=5)
+
+    # [DODATEK] Filtrowanie rekordów
+    sio = StringIO(sample_records) # type: ignore
+    records = SeqIO.parse(sio, "genbank") 
+    filtered_records = []
+    for record in records:
+        if min_len is not None and len(record.seq) < min_len:
+            continue
+
+        if max_len is not None and len(record.seq) > max_len:
+            continue
+
+        filtered_records.append(record) 
+
+    # [DODATEK] Generowanie csv
+    generate_csv(records, taxid)
+
+
+
+    print(type(sample_records))
+
     
     # Zapisz do pliku
     output_file = f"taxid_{taxid}_sample.gb"
