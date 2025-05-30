@@ -101,6 +101,7 @@ def generate_csv(records, taxid):
 
 
 def generate_chart(records, taxid):
+    records = sorted(list(records), key=lambda r: len(r.seq))
     accession_numbers = []
     seq_lengths = []
 
@@ -108,10 +109,13 @@ def generate_chart(records, taxid):
         accession_numbers.append(record.id)
         seq_lengths.append(len(record.seq))
 
-    plt.plot(accession_numbers, seq_lengths, marker="o")
-    plt.xlabel("Accession number")
-    plt.ylabel("Seq length")
+    fig, ax = plt.subplots()
+    ax.plot(accession_numbers, seq_lengths, marker="o")
+    ax.set_xlabel("Accession number")
+    ax.tick_params("x", labelsize=8)
+    ax.set_ylabel("Seq length")
     path = f"taxid_{taxid}_chart.png"
+    plt.tight_layout()
     plt.savefig(path)
     print(f"Saved chart to {path}.")
     
